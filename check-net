@@ -1,0 +1,18 @@
+#!/bin/sh
+# daily cron job to check if raspberry pi zero-W has lost network connectivity
+# put script in /etc/cron.daily... make sure owner is root:root and chmod is 755
+# note: need to install ifupdown-extra package to get network-test!
+export CHECK_IP_URL=query-ip.com
+network-test -v 3 -s
+status=$?
+#echo $status
+if [ $status -ne 0 ] ; then
+	echo "network has problems... re-boot and test again tomorrow..."
+	logger -p local0.notice -t NETWORK-TEST system re-booting due to failed network
+#       hint: give enough time for any remaining cron jobs to finish
+	shutdown -r +15
+else
+	echo "network is in good shape!"
+	logger -p local0.info -t NETWORK-TEST network is in good shape!
+fi
+
